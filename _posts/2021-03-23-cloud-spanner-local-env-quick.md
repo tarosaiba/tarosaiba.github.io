@@ -38,9 +38,8 @@ Sample code is here: [**tarosaiba/docker-compose-spanner**](https://github.com/t
 
 
 Two points of this code set.
-* 通常、Spannerエミュレータ起動後にインスタンスの作成手順(`gcloud spanner instances create`)が必要になりますが、docker-compose立ち上げ時に自動でインスタンス作成されるようにしています
 * ✔ Normally, the instance creation procedure (`gcloud spanner instances create`) is required after launching the Spanner emulator, but I have made docker-compose so that instances are created automatically when we execute `docker-compose up`.
-* For DB initialization process (table creation & data submission), pre-prepared DDL/DML is automatically executed when docker-compose is started up.
+* ✔ For DB initialization process (table creation & data submission), pre-prepared DDL/DML is automatically executed when docker-compose is started up.
 
 So here are the steps.
 
