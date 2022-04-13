@@ -3,7 +3,7 @@
 
 This article introduces the procedure to quickly set up a local development environment for Cloud Spanner using docker-compose. Recommended for those who develop with Cloud Spanner and for those who are curious about it and would like to try a few touches.
 
-## What is Cloud Spanne?
+## What is Cloud Spanner?
 Let me briefly introduce Cloud Spanner (referred to as "Spanner").
 
 Spanner is the only relational database service that combines powerful consistency and horizontal scalability offered by Google Cloud.
