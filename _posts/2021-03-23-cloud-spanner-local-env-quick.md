@@ -1,61 +1,64 @@
-# はじめに
+# Quickly set up a local development environment for Cloud Spanner with docker-compose
+## Introduction
 
-こんにちは、TIGの齋場です。[GCP連載2021](/articles/20210307/)の第11弾です。
+This article introduces the procedure to quickly set up a local development environment for Cloud Spanner using docker-compose. Recommended for those who develop with Cloud Spanner and for those who are curious about it and would like to try a few touches.
 
-本記事では、Cloud Spannerのローカル開発環境をdocker-composeでサクッと立ち上げる手順を紹介します。Cloud Spannerを用いた開発を行う方、また興味あるから少し触ってみたいという方にもおすすめです。
+## What is Cloud Spanne?
+Let me briefly introduce Cloud Spanner (referred to as "Spanner").
 
-# Cloud Spannerとは
-簡単にCloud Spanner (以下「Spanner」と記載)について紹介させていただきます。
+Spanner is the only relational database service that combines powerful consistency and horizontal scalability offered by Google Cloud.
 
-Spannerは、Google Cloudが提供する"強力な一貫性と水平方向の拡張性を兼ね備えた唯一のリレーショナルデータベースサービス" です。
+The following is from the official documentation
 
-以下公式ドキュメントの抜粋です。
+> ・Get all the benefits of relational semantics and SQL with unlimited scale
+> ・Start at any size and scale with no limits as your needs grow
+> ・Enjoy high availability with zero scheduled downtime and online schema changes
+> ・Deliver high-performance transactions with strong consistency across regions and continents
+> ・Focus on innovation, eliminating manual tasks with capabilities like automatic sharding
 
-> ・無制限のスケーリングによって、リレーショナル セマンティクスと SQL のすべてのメリットを享受
-> ・任意のサイズで開始し、ニーズの拡大に応じて制限なしでスケーリング
-> ・計画的ダウンタイムのない、オンラインでのスキーマ変更で高可用性を実現
-> ・リージョンや大陸全体にわたる強整合性で高性能のトランザクションを提供
-> ・自動シャーディングなどの機能により手動のタスクを排除し、イノベーションに注力
+It's a dreamy database service. But then again, it sounds expensive... The fee is as follows.
 
-夢のようなデータベースサービスですね。でも、となるとやっぱりお高そう..料金は以下ような感じです。
-
-#### １ノードあたりの料金（すべてのレプリケーションを含む）
-| 構成             | リージョン             | $/時間 | $/月 (100%稼働) |
+#### Price per node (including all replication) as of March 2021.3
+| Type             | Region                 | $/hour | $/month (100%) |
 |------------------|------------------------|--------|-----------------|
-| リージョン       | asia-northeast1 (東京) | 1.17   | 842.4           |
-| マルチリージョン | asia1 (東京+大阪)      | 3.9    | 2808            |
+| Single-region    | asia-northeast1 (Tokyo) | 1.17  | 842.4           |
+| Multi-region     | asia1 (Tokyo+Osaka)     | 3.9   | 2808            |
 
-最小構成のリージョン+1ノード構成でも、なかなかのコストが掛かりますね。
+That's quite a lot of cost even for the smallest configuration, region + 1 node configuration.
 
 
-# 開発環境どうするか
-コストが高いので、開発環境用に気軽にインスタンスを立ち上げるのは難しそうです。
-ということで、本記事ではGCPが公式で提供してくれている [Spanner エミュレータ](https://cloud.google.com/spanner/docs/emulator?hl=ja) を使って開発環境を立ち上げます！(エミューレータあってよかったありがとう!)
+## How do we prepare development environment
+Because of the high cost, it seems difficult to casually set up an instance for a development environment.
+Therefore, in this article, we will use [Spanner emulator](https://cloud.google.com/spanner/docs/emulator?hl=ja), which is officially provided by GCP, to set up a development environment! (Thank goodness for emulators!)
 
-gcloud CLIとdockerイメージでの提供がありますが、今回はdocker-composeで利用する例を紹介します。
-サンプルコードはこちら: [**tarosaiba/docker-compose-spanner**](https://github.com/tarosaiba/docker-compose-spanner)
+It is available in gcloud CLI and docker image, but we will show an example of using it with docker-compose.
+Sa
+Sample code is here: [**tarosaiba/docker-compose-spanner**](https://github.com/tarosaiba/docker-compose-spanner)
 
-以下2点工夫したポイントです。
+
+Two points of this code set.
 * 通常、Spannerエミュレータ起動後にインスタンスの作成手順(`gcloud spanner instances create`)が必要になりますが、docker-compose立ち上げ時に自動でインスタンス作成されるようにしています
-* DBの初期化処理(テーブル作成&データ投入)のために、事前に用意したDDL/DMLをdocker-compose立ち上げ時に自動で実行されるようにしています
+* ✔ Normally, the instance creation procedure (`gcloud spanner instances create`) is required after launching the Spanner emulator, but I have made docker-compose so that instances are created automatically when we execute `docker-compose up`.
+* For DB initialization process (table creation & data submission), pre-prepared DDL/DML is automatically executed when docker-compose is started up.
 
-ということで早速手順を紹介します。
+So here are the steps.
 
-# 要件
+## Requirement
 * docker >= 19.03.0+
 * docker-compose >= 1.27.0+
 
-# 手順
-## クイックスタート
-* リポジトリをクローン [https://github.com/tarosaiba/compose-spanner](https://github.com/tarosaiba/compose-spanner)
-* ディレクトリに移動  `cd compoose-spanner`
-* docker-compose起動 `docker-compose up -d`
+## Steps
+### Quick start
+* Clone sample repository [https://github.com/tarosaiba/compose-spanner](https://github.com/tarosaiba/compose-spanner)
+* Change directry  `cd compoose-spanner`
+* Launch docker-compose `docker-compose up -d`
 
-手順は以上です!
+That's all for the steps!
 
-## spanner-cliによるSpanner接続方法
-さっそくcliで接続してみましょう。
-※ インスタンス、データベースが作成されるまで十数秒待つ必要があります
+### How to connect to Spanner using spanner-cli
+Let's quickly connect with CLI.
+※We will need to wait a few seconds for the database to be ready.
+
 
 ```
 $ docker-compose exec spanner-cli spanner-cli -p test-project -i test-instance -d test-database
@@ -63,7 +66,7 @@ Connected.
 spanner>
 ```
 
-接続できました！では、テーブルを確認してみましょう。
+We're connected! Now let's check the table.
 
 ```bash
 spanner> show tables;
@@ -87,57 +90,57 @@ spanner> select * from Singers;
 4 rows in set (800.4us)
 ```
 
-テーブルとデータも確認することができました。
+We can see tables and data that are created by DB initialization process.
 
-## アプリケーションからの接続方法
+### How to connect from your application
 
-開発するアプリケーションで `SPANNER_EMULATOR_HOST=localhost:9010` 設定すればOKです。各クライアントライブラリごとのサンプルは[こちらの公式ドキュメント](https://cloud.google.com/spanner/docs/emulator)を参照してください。
-
-
-## エミュレータの制限事項と相違点
-
-ここで注意点ですが、[公式ドキュメント](https://cloud.google.com/spanner/docs/emulator?hl=ja#limitations_and_differences)にある通りエミュレータは以下のような制限事項および、相違点があります。以下を理解して利用しましょう。
-
-#### 制限事項
-
-> * TLS/HTTPS、認証、IAM、権限、ロール。
-> * PLAN または PROFILE クエリモード。 NORMAL のみがサポートされます。
-> * 監査ログとモニタリング ツール。
-
-#### 相違点
-> * エミュレータのパフォーマンスとスケーラビリティは、本番環境サービスと同等ではありません。
-> * 読み取り/書き込みトランザクションとスキーマ変更は、完了するまでデータベース全体を排他的にのみアクセスできるようにロックします。
-> * パーティション化 DML とパーティション クエリはサポートされていますが、エミュレータはステートメントが分割可能かどうかは確認しません。つまり、パーティション化 DML またはパーティション クエリ ステートメントがエミュレータで実行される場合でも、本番環境ではパーティション化できないステートメント エラーにより失敗する可能性があります。
+Just set `SPANNER_EMULATOR_HOST=localhost:9010` in the application you are developing. For samples of each client library, please refer to [this official document](https://cloud.google.com/spanner/docs/emulator).
 
 
-# 解説
+### Emulator Limitations and Differences
 
-ざっくりサンプルコードの解説をさせていただきます
+As a reminder, the emulator has the following limitations and differences as described in the [official documentation](https://cloud.google.com/spanner/docs/emulator?hl=ja#limitations_and_differences). The following is a list of the points Please understand the following before use.
 
-### ファイル構成
+##### Limitations
+
+> * TLS/HTTPS, authentication, IAM, permissions, roles.
+> * PLAN or PROFILE query mode. Only NORMAL is supported.
+> * Audit log and monitoring tools.
+
+##### Differences
+> * Emulator performance and scalability are not equivalent to production services.
+> * Read/write transactions and schema changes lock the entire database for exclusive access only until completion.
+> * Partitioned DML and partition queries are supported, but the emulator does not check to see if a statement is partitionable. This means that even if a partitioned DML or partition query statement runs in the emulator, it may fail in production due to a statement error that cannot be partitioned.
+
+
+## Detailed Explanation
+
+Let me explain the sample code
+
+#### file structure
 
 <img src="/images/20210323/image.png" loading="lazy">
 
-* **docker-compose.yaml** : docker-composeファイルです。これを立ち上げます
-* **migrations** : DB初期化時に適用するDDL&DMLを配置します
+* **docker-compose.yaml** : This is docker-compose file. We will launch container with it.
+* **migrations** : Places DDL & DML to be applied during DB initialization
 
-### 利用しているDockerイメージ
+#### Docker images in use
 
-| Docker Image                                  | 説明                                                                                                    | 用途                        |
-|-----------------------------------------------|---------------------------------------------------------------------------------------------------------|-----------------------------|
-| gcr.io/cloud-spanner-emulator/emulator        | GCP提供のSpannerエミュレータ[公式ドキュメント](https://cloud.google.com/spanner/docs/emulator)          | ・Spannerエミュレータ本体   |
-| gcr.io/google.com/cloudsdktool/cloud-sdk:slim | GCP利用のためのツールとライブラリ[公式ドキュメント](https://cloud.google.com/sdk/docs/downloads-docker) | ・インスタンスの作成        |
-| mercari/wrench                                | SpannerのSchemaマネジメントツール [Github](https://github.com/cloudspannerecosystem/wrench)             | ・テーブル作成 ・データ投入 |
-| sjdaws/spanner-cli                            | SpannerのCLIツール [Github](https://github.com/cloudspannerecosystem/spanner-cli)                       | ・CLIアクセス               |
+| Docker Image | Description | Usage
+ |-----------------------------------------------|---------------------------------------------------------------------------------------------------------|-----------------------------|
+| gcr.io/cloud-spanner-emulator/emulator | Spanner emulator provided by GCP [official documentation](https://cloud.google.com/spanner/docs/emulator) | ・Spanner Emulator itself |
+| gcr.io/google.com/cloudsdktool/cloud-sdk:slim | Tools and Libraries for Using GCP [Official Documentation](https://cloud.google.com/sdk/docs/downloads-docker) Instance Creation |
+| mercari/wrench | Schema management tool for Spanner [Github](https://github.com/cloudspannerecosystem/wrench) | ・Table creation ・Data submission |
+| sjdaws/spanner-cli | Spanner's CLI tool [Github](https://github.com/cloudspannerecosystem/spanner-cli) | ・CLI access |
 
-※`wrench` および、`spanner-cli` は [Cloud Spanner Ecosystem](https://github.com/cloudspannerecosystem)で公開されています
-※MercariさんはSpannerのツールや知見を惜しみなく公開してくれており、非常に感謝です..!!
+※`wrench` and `spanner-cli` are available at [Cloud Spanner Ecosystem](https://github.com/cloudspannerecosystem)
+※ Mercari shares Spanner's tools and findings. Thanks!
 
-### コンテナ構成のイメージとdocker-compose.yamlの内容
+#### Diagram of containers  and docker-compose.yaml contents
 
 <img src="/images/20210323/image_2.png" loading="lazy">
 
-Spannerエミュレータ本体`spanner`とCLIアクセス用の`spanner-cli`は常駐プロセスとして起動し続け、それ以外のコンテナはコマンド実行後に正常終了します
+spanner emulator itself `spanner` and `spanner-cli` for CLI access will continue to run as resident processes, and other containers will exit normally after command execution
 
 ```yaml
 version: '3'
@@ -202,17 +205,15 @@ services:
       command: ['sh', '-c', 'echo this container keep running && tail -f /dev/null']
 ```
 
-以下、補足になります
+The following is a supplementary explanation
 
-* wrenchコンテナは`restart: on-failure`と設定しています
-    - wrenchはSpannerインスタンス作成後に実行したいのですが、docker-composeの起動制御が複雑になるので、失敗→再起動→再実行 するようになっています
-* spanner-cliコンテナは、`tail -f /dev/null` でコンテナ起動状態を保つようにしています
-    - `docker-exec`でコマンドを実行するためです
-    - ※spanner-cliは、go getでもローカルPCにインストール可能 (筆者はローカルにインストールするのが面倒だった)
+* wrench container is set to `restart: on-failure
+    - We want to run wrench after creating a Spanner instance, but docker-compose's startup control is complicated, so we use fail -> restart -> re-run.
+* spanner-cli containers use `tail -f /dev/null` to keep container startup state
+    - To execute commands with `docker-exec
+    - spanner-cli can also be installed on a local PC by go get (the author had trouble installing it locally).
 
 
-# おわりに
+## Conclusion
 
-SpannerはNewSQLと称されるだけあり MySQLやPostgresと比較すると情報も乏しいですが、日本でも採用事例は増えてきていて今後増々期待できるデータベースサービスかと思います！
-
-今回は、Spannerのローカル開発環境を立ち上げる方法を紹介させていただきました。宣言的に定義することで、立ち上げの手順もシンプルにできていると思います。興味のある方はぜひ立ち上げて触ってみてください。
+As Spanner is called "NewSQL", information on it very little information compared to MySQL and Postgres. But case of its use are increasing in Japan, and I think it is a database service that we can expect to see more of in the future!
