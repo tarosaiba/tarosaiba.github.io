@@ -19,6 +19,7 @@ The following is from the official documentation
 It's a dreamy database service. But then again, it sounds expensive... The fee is as follows.
 
 #### Price per node (including all replication) as of March 2021.3
+
 | Type             | Region                 | $/hour | $/month (100%) |
 |------------------|------------------------|--------|-----------------|
 | Single-region    | asia-northeast1 (Tokyo) | 1.17  | 842.4           |
