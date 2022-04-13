@@ -120,7 +120,7 @@ Let me explain the sample code
 
 #### file structure
 
-<img src="/images/20210323/image.png" loading="lazy">
+![image](https://user-images.githubusercontent.com/6553453/163182834-23d23813-66f1-41cb-a8b9-fdf3ad721a82.png)
 
 * **docker-compose.yaml** : This is docker-compose file. We will launch container with it.
 * **migrations** : Places DDL & DML to be applied during DB initialization
@@ -139,7 +139,7 @@ Let me explain the sample code
 
 #### Diagram of containers  and docker-compose.yaml contents
 
-<img src="/images/20210323/image_2.png" loading="lazy">
+![image](https://user-images.githubusercontent.com/6553453/163182970-0055c13e-7d73-4ac7-a9e9-dc59c63eaeb4.png)
 
 spanner emulator itself `spanner` and `spanner-cli` for CLI access will continue to run as resident processes, and other containers will exit normally after command execution
 
