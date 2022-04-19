@@ -1,14 +1,14 @@
-# Kafka周りの開発・テストに便利なツールをdocker-composeにまとめました
+# Useful tools for development and testing around Kafka in docker-compose
 
-最近、Kafkaを利用していたのですが、その中で便利だったツール、及び私自身がつくったツールをまとめました。
-docker-composeですぐに立ち上げるようにしていますので、**とりあえずKafkaを動かしてみたい&管理してみたい**、という方におすすめです。
+I have recently been using Kafka. Kafka-Train is a list of tools that I have found useful, as well as tools that I have created myself.
+I wrote docker-compose file to get it up and running immediately, so if you want to **run & manage Kafka for now**, this is a good choice.
 
-このdocker-composeファイルは [tarosaiba/kafka-train](https://github.com/tarosaiba/kafka-train)のリポジトリにまとめてさせてもらっています。"kafka-train"という名前はなんとなくつけました。
+This docker-compose file has been put together in the [tarosaiba/kafka-train](https://github.com/tarosaiba/kafka-train) repository." The name "kafka-train" is just a random name.
 
 ![image.png](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/108052/7910561a-4455-afe2-203c-5513abc460f9.png)
 
 
-今回紹介するツールは以下です (すべてDockerコンテナとして提供されています)
+The following tools are introduced in this article (all are provided as Docker containers)
 * [wurstmeister/zookeeper](https://hub.docker.com/r/wurstmeister/zookeeper)
 * [wurstmeister/kafka](https://hub.docker.com/r/wurstmeister/kafka/)
 * [tarosaiba/kafka-train-producer](https://hub.docker.com/r/tarosaiba/kafka-train-producer)
@@ -20,12 +20,12 @@ docker-composeですぐに立ち上げるようにしていますので、**と�
 
 # Quick Start
 
-以下のリポジトリを利用します
+Use the following repositories
 [tarosaiba/kafka-train](https://github.com/tarosaiba/kafka-train)
 
 ## Start
 
-* docker-composeで起動
+* Launch with docker-compose
 
 ```
 $ docker-compose up -d
@@ -33,8 +33,8 @@ $ docker-compose up -d
 
 ## Produce
 
-* メッセージをProduceします
-    - シェルスクリプトでシンプルなシーケンシャルな数字を送信します (01,02,03,04,05...)
+* Produce message
+    - Send simple sequential numbers in shell script (01,02,03,04,05...)
 
 ```
 $ ./send_msg.sh 5
@@ -45,7 +45,7 @@ $ ./send_msg.sh 5
 {"id":5,"body":"Massage: 05"}
 ```
 
-* 以下のように任意のメッセージをProduceすることも可能です
+* It is also possible to produce a message which you want as follows
 
 ```
 curl -X POST \
@@ -56,7 +56,7 @@ curl -X POST \
 
 ### Consume
 
-* Consumerコンテナのログを見ると、メッセージが出力されています
+* The log in the Consumer container outputs the message which we produced
 
 ```
 $ docker logs -f kafka-train_consumer_1
@@ -77,34 +77,31 @@ waiting for event...
 ```
 
 
-# 各ツール紹介
-## メインどころ
+# Introduction of each tool
+## Main tools
 
 * [wurstmeister/zookeeper](https://hub.docker.com/r/wurstmeister/zookeeper)
 * [wurstmeister/kafka](https://hub.docker.com/r/wurstmeister/kafka/)
 
-これがないと始まりません。ZookeeperとKafkaのコンテナです。(私が作ったわけではありません)
-※もし、サーバのIPでKafkaにアクセスさせたいときは、`KAFKA_ADVERTISED_HOST_NAME`の使い方を気をつけてください
+You can't start without these. They are containers for Zookeeper and Kafka.
+If you want Kafka to access the server IP, be careful how you use `KAFKA_ADVERTISED_HOST_NAME`!
 
 ## Poducer & Consumer
 
 * [tarosaiba/kafka-train-producer](https://hub.docker.com/r/tarosaiba/kafka-train-producer)
 * [tarosaiba/kafka-train-consumer](https://hub.docker.com/r/tarosaiba/kafka-train-consumer)
 
-KafkaのProducerとConsumerもセットで動かせるようにgoで簡単に作りました
-Producerは、APIサーバで、`/kafka`のエンドポイントにメッセージを投げるとKafkaにメッセージをProduceします
-Consumreは、メッセージをConsumeして標準出力に出力する単純なものです
 
-Quick Startで記載しているものが、これらになります。
+I made it easy in go to run Kafka Producer and Consumer as a set.
+Producer is an API server that produces messages to Kafka when you throw messages to the `/kafka` endpoint.
+Consumre is a simple way to consume messages and output them to standard output.
 
 ## Burrow
 
 * [tarosaiba/kafka-burrow](https://hub.docker.com/r/tarosaiba/kafka-burrow)
 
-Kafkaのモニタリングツールとしてよく使われる"Burrow"をコンテナで動かせるように簡単に作りました
-RestAPIでKafkaの情報を返します。
-このBurrowにより、Consumer groupのlagも取得可能です。
-以下のように利用できます
+I made a simple Docker image of "Burrow", which is often used as a Kafka monitoring tool, to run in a container.
+Returns Kafka information via RestAPI. This Burrow also allows you to get the Consumer group's lag. It can be used as follows
 
 ```
 # list topic
@@ -116,30 +113,29 @@ $ curl localhost:8888/v3/kafka/local/consumer
 {"error":false,"message":"consumer list returned","consumers":["burrow-local","test-group"],"request":{"url":"/v3/kafka/local/consumer","host":"2fb74ea6b81d"}}
 ```
 
-どのようなエンドポイントが使えるかは以下にドキュメントがあります
+Here is the documentation on what endpoints are available
 [Burrow-HTTP-Endpoint](https://github.com/linkedin/Burrow/wiki/HTTP-Endpoint)
 
-## その他管理ツール
-その他私が使って便利だったツール群です。(私が作ったわけではありません)
+## Other management tools
+These are tools that I have used and found useful. (I did not create these tools.)
 
 * [confluentinc/cp-kafka-rest:4.0.0](https://hub.docker.com/r/confluentinc/cp-kafka-rest)
 * [landoop/kafka-topics-ui:0.9.3](https://github.com/lensesio/kafka-topics-ui)
 
-kafka topicは、KafkaにProduceされたメッセージをGUIで見ることができます。見やすいです
-kafka-restというツールを用いて、Kafkaの中のメッセージを取得するため、セットで動かす必要があります
+
+kafka topic allows you to view messages Produced in Kafka in a GUI. It is easy to see
+A tool called kafka-rest is used to retrieve messages in Kafka, so it is necessary to run with.
 
 ![image.png](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/108052/5476eb2a-a709-cb87-3408-78e4b622f258.png)
 
 
-
 * [sheepkiller/kafka-manager](https://github.com/sheepkiller/kafka-manager-docker)
 
-kafka-managerは、Consumer groupの情報を見るのに便利です。Commit offsetとlagも見ることができます
+kafka-manager is useful for viewing Consumer group information, including Commit offset and lag
 
 ![image.png](https://qiita-image-store.s3.ap-northeast-1.amazonaws.com/0/108052/2a285030-e52d-74af-8c51-dd2c15a91044.png)
 
 
-# まとめ
+# Conclusion
 
-以上がKafka周りの開発・テストに便利なツールになります。ぜひ使ってみてください。
-
+These are useful tools for development and testing around Kafka. I encourage you to use them!
