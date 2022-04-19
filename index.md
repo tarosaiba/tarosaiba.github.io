@@ -1,5 +1,5 @@
 
-![profile](./img/top_profile.png)
+![profile](./img/top_profile.jpg)
 
 # Who am I?
 I am a DevOps consultant in Tokyo.I write about my daily technical knowledge and thoughts as a DevOps consultant.
